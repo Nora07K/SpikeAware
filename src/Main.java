@@ -9,18 +9,7 @@ public class Main {
 
         SpikePersistantRDB MyModel = new SpikePersistantRDB();
         Controller MyController = new Controller();
-        MyController.Run(10);
-
-
-
-
-
-
-
-
-
-
-
+        MyController.Run("10");
 
 
         SpikePersistantRDB MyBackend = new SpikePersistantRDB();
