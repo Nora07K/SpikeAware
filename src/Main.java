@@ -3,10 +3,25 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
-
 public class Main {
 
     public static void main(String[] args) {
+
+        SpikePersistantRDB MyModel = new SpikePersistantRDB();
+        Controller MyController = new Controller();
+        MyController.Run(10);
+
+
+
+
+
+
+
+
+
+
+
+
 
         SpikePersistantRDB MyBackend = new SpikePersistantRDB();
 
@@ -79,7 +94,7 @@ public class Main {
 */
 
 
-        //My Draft Articles
+/*        //My Draft Articles
         Scanner ArticleReadID= new Scanner(System.in);
         try {
             System.out.println("1. View My Draft Articles");
@@ -149,7 +164,7 @@ public class Main {
             //code to go back to the view my draft articles and home menu
             System.exit(0);
         }
-
+*/
 
 
 
