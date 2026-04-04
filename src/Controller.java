@@ -22,18 +22,25 @@ public class Controller {
     }
 
     public void Run(String menuID) {
-        ConsoleView MyView = new ConsoleView();
-        MyView.DisplayMenuItem(MenuMap.get(menuID));
-        //System.out.println(MenuMap.get(menuID)[2]);
+        String CurrnetMenu = menuID;
+        while (true) {
+            ConsoleView MyView = new ConsoleView();
+            MyView.DisplayMenuItem(MenuMap.get(CurrnetMenu));
+            //System.out.println(MenuMap.get(menuID)[2]);
 
-        for (MenuItem v : MenuMap.values()) {
-            if (v.ParentID != null && v.ParentID == menuID) {
-                MyView.DisplayMenuItem(v);
-                //System.out.println(v[2]);
+            for (MenuItem v : MenuMap.values()) {
+                if (v.ParentID != null && v.ParentID == CurrnetMenu) {
+                    MyView.DisplayMenuItem(v);
+                    //System.out.println(v[2]);
+                }
             }
-        }
-        MenuItem Chosen = MyView.ChooseMenuItem();
-        System.out.println(Chosen);
+            MenuItem Chosen = MyView.ChooseMenuItem();
+            System.out.println(Chosen.Action);
 
+            if (Chosen.Action != null && Chosen.Action == "Quit") {
+                System.exit(0);
+            }
+            CurrnetMenu = Chosen.NextID;
+        }
     }
 }
