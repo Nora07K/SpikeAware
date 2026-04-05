@@ -4,16 +4,12 @@ import java.util.Scanner;
 public class ConsoleView {
     User MyUser;
     ArrayList<MenuItem> MenuMemory;
-    String DogColour;
-    String DogType;
-    int DogTypeID;
+    ExtraCWdata CWdata;
 
     public ConsoleView() {
         MenuMemory = new ArrayList<MenuItem>();
         MyUser = new User();
-        DogColour = null;
-        DogType = null;
-        DogTypeID  = 0;
+        CWdata = new ExtraCWdata();
     }
 
     public String StringInput(String PinputText, String P_OriginalValue) {
@@ -28,9 +24,6 @@ public class ConsoleView {
     }
 
     public MenuItem ChooseMenuItem() {
-    /*    for (int i = 0; i < MenuMemory.size(); i++) {
-            System.out.println(MenuMemory.get(i).Hotkey);
-        } */
         MenuItem MenuDecision = null;
         while (true) {
             Scanner ChooseMenuHotkey = new Scanner(System.in);
