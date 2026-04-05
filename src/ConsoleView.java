@@ -3,17 +3,24 @@ import java.util.Scanner;
 
 public class ConsoleView {
     User who = new User();
-    //ConsoleView DisplayMenu = new ConsoleView();
-    ArrayList<MenuItem> MenuMemory = new ArrayList<MenuItem>();
+    ArrayList<MenuItem> MenuMemory;
+    String DogColour;
+    String DogType;
+
+    public ConsoleView() {
+        MenuMemory = new ArrayList<MenuItem>();
+        DogColour = null;
+        DogType = null;
+    }
 
     public String StringInput() {
         return "";
     }
 
     public MenuItem ChooseMenuItem() {
-        for (int i = 0; i < MenuMemory.size(); i++) {
+    /*    for (int i = 0; i < MenuMemory.size(); i++) {
             System.out.println(MenuMemory.get(i).Hotkey);
-        }
+        } */
         MenuItem MenuDecision = null;
         while (true) {
             Scanner ChooseMenuHotkey = new Scanner(System.in);
@@ -29,6 +36,7 @@ public class ConsoleView {
             }
             System.out.println("Please try again. Invalid input of:" + UserInput);
         }
+        MenuMemory = new ArrayList<MenuItem>();
         return MenuDecision;
     }
 
