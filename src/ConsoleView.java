@@ -2,15 +2,18 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ConsoleView {
-    User who = new User();
+    User MyUser;
     ArrayList<MenuItem> MenuMemory;
     String DogColour;
     String DogType;
+    int DogTypeID;
 
     public ConsoleView() {
         MenuMemory = new ArrayList<MenuItem>();
+        MyUser = new User();
         DogColour = null;
         DogType = null;
+        DogTypeID  = 0;
     }
 
     public String StringInput(String PinputText, String P_OriginalValue) {

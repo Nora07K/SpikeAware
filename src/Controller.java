@@ -1,5 +1,3 @@
-import java.lang.reflect.Array;
-import java.util.HashMap;
 import java.util.TreeMap;
 import java.lang.reflect.*;
 
@@ -7,6 +5,7 @@ public class Controller {
 
     TreeMap<Integer, MenuItem> MenuMap = new TreeMap<Integer, MenuItem>();
     ConsoleView MyView;
+    SpikePersistantRDB MyModel;
 
     public Controller() {// ParentID	Hotkey	Text to display	Action	Next Menu ID
 
@@ -19,10 +18,11 @@ public class Controller {
         MenuMap.put(12, new MenuItem(1, "Z", "Zold", "ChangeColour", 10));
         MenuMap.put(13, new MenuItem(1, "C", "Custom Colour", "InputColour", 10));
         MenuMap.put(19, new MenuItem(1, "H", "Home", null, 10));
-        MenuMap.put(21, new MenuItem(2, "T", "Tacsko", "ChangeDog", 10));
-        MenuMap.put(22, new MenuItem(2, "B", "Bernathy", "ChangeDog", 10));
+        MenuMap.put(21, new MenuItem(2, "T", "Tacsko", "ChangeDog", 10, new ExtraMIdata(101)));
+        MenuMap.put(22, new MenuItem(2, "B", "Bernathy", "ChangeDog", 10, new ExtraMIdata(202)));
         MenuMap.put(29, new MenuItem(2, "H", "Home", null, 10));
         MyView = new ConsoleView();
+        MyModel = new SpikePersistantRDB();
     }
 
     public void Quit(MenuItem param, ConsoleView Vparam) {
@@ -41,12 +41,14 @@ public class Controller {
     public void ChangeDog(MenuItem param, ConsoleView Vparam) {
         Vparam.DogType = param.Text;
         System.out.println(Vparam.DogType);
+        Vparam.DogTypeID = param.Xtra.DogTypeID;
     }
     public void Paint(MenuItem param, ConsoleView Vparam) {
         if (Vparam.DogType == null || Vparam.DogColour == null) {
             System.out.println("Error occured, make sure to have selected a dog type and a dog colour");
         } else {
-            System.out.println("I am painting: " + Vparam.DogType + " " + Vparam.DogColour );
+            System.out.println("I am painting: " + Vparam.DogType + " " + Vparam.DogTypeID + " " +  Vparam.DogColour );
+            this.Quit(param, Vparam);
         }
     }
     public void Run(int menuID) {

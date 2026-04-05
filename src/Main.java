@@ -7,12 +7,12 @@ public class Main {
 
     public static void main(String[] args) {
 
-        SpikePersistantRDB MyModel = new SpikePersistantRDB();
+        //SpikePersistantRDB MyModel = new SpikePersistantRDB();
         Controller MyController = new Controller();
         MyController.Run(10);
 
 
-        SpikePersistantRDB MyBackend = new SpikePersistantRDB();
+        //SpikePersistantRDB MyBackend = new SpikePersistantRDB();
 
 
 /*        //Register
