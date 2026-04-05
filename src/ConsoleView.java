@@ -13,8 +13,15 @@ public class ConsoleView {
         DogType = null;
     }
 
-    public String StringInput() {
-        return "";
+    public String StringInput(String PinputText, String P_OriginalValue) {
+        Scanner InputOfUser = new Scanner(System.in);
+        System.out.println(PinputText + ". Current Value: " + P_OriginalValue);
+        String InputString = InputOfUser.nextLine();
+        if (InputString == "") {
+            return P_OriginalValue;
+        } else {
+            return InputString;
+        }
     }
 
     public MenuItem ChooseMenuItem() {

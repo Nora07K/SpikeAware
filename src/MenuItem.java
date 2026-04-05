@@ -1,12 +1,12 @@
 public class MenuItem {
 
-    String ParentID;
+    int ParentID;
     String Hotkey;
     String Text;
     String Action;
-    String NextID;
+    int NextID;
 
-    public MenuItem(String P_ParentID, String P_Hotkey, String P_Text, String P_Action, String P_NextID) {
+    public MenuItem(int P_ParentID, String P_Hotkey, String P_Text, String P_Action, int P_NextID) {
         ParentID = P_ParentID;
         Hotkey = P_Hotkey;
         Text = P_Text;
