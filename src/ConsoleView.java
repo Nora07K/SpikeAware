@@ -23,6 +23,13 @@ public class ConsoleView {
         }
     }
 
+    public String StringInput(String PinputText) {
+        Scanner InputOfUser = new Scanner(System.in);
+        System.out.println(PinputText);
+        String InputString = InputOfUser.nextLine();
+        return InputString;
+    }
+
     public MenuItem ChooseMenuItem() {
         MenuItem MenuDecision = null;
         while (true) {

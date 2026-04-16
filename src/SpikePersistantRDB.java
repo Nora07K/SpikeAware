@@ -6,13 +6,13 @@ public class SpikePersistantRDB {
 
     Connection connection = null;
 
-    public SpikePersistantRDB() {
+    public SpikePersistantRDB(String db_host, String db_password, String db_user) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/persistantstorageuni",
-                    "root",
-                    "Vollyball_07"
+                    db_host,
+                    db_user,
+                    db_password
             );
         } catch (Exception e) {
             System.out.println(e);
@@ -20,27 +20,107 @@ public class SpikePersistantRDB {
 
     }
 
-
-    public void CreateUser(User Who) {
-
-        System.out.println("Your Username is:  " + Who.Name);
-        System.out.println("Your Password is: " + Who.Password);
-        System.out.println("Your access level is: " + Who.AccessLevel);
-
+    public ArrayList<Article> ListArticlesForSearch(String UserInputSearchBar) {
+        ArrayList<Article> ReturnListofSearched = new ArrayList<>();
         try {
-            String query = "INSERT INTO User (Username, Password, UserID, AccessLevel) " +
-            "VALUES (?, ?, ?, ?);";
+            String querytolist = "Select * FROM Article where ArticleStatus = ? And (ArticleTitle like ? or ArticleContent LIKE ?)";
+            PreparedStatement myStmt = connection.prepareStatement(querytolist);
+            myStmt.setString(1, "Approved");
+            myStmt.setString(2, UserInputSearchBar);
+            myStmt.setString(3, UserInputSearchBar);
+            ResultSet rs = myStmt.executeQuery();
+            while (rs.next()) {
+                Article MyArticle = new Article();
+                MyArticle.ArticleID = rs.getInt("ArticleID");
+                MyArticle.CreationDate = rs.getDate("CreationDate");
+                MyArticle.ArticleTitle = rs.getString("ArticleTitle");
+                MyArticle.ArticleContent = rs.getString("ArticleContent");
+                MyArticle.UserIDofAuthor = rs.getInt("UserIDofAuthor");
+                MyArticle.ArticleStatus = rs.getString("ArticleStatus");
+                MyArticle.ArticleVideoURL = rs.getString("ArticleVideoURL");
+                MyArticle.ArticleImageURL = rs.getString("ArticleImageURL");
+                MyArticle.ViewCount = rs.getInt("ViewCount");
+                MyArticle.LikeCount = rs.getInt("LikeCount");
+                MyArticle.DislikeCount = rs.getInt("DislikeCount");
+                MyArticle.RejectionReason = rs.getString("RejectionReason");                MyArticle.ArticleContent = rs.getString("ArticleContent");
+                ReturnListofSearched.add(MyArticle);
+            }
+        } catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+        return ReturnListofSearched;
+    }
+
+    public Integer CountLikes(int IDofArticle) {
+        int NumbOfCount;
+        try {
+            String query = "SELECT COUNT(ArticleID) FROM likes WHERE ArticleID = ?;";
+            PreparedStatement myStmt = connection.prepareStatement(query);
+            myStmt.setInt(1, IDofArticle);
+            ResultSet rs = myStmt.executeQuery();
+            NumbOfCount = 0;
+            if (rs.next()) {
+                NumbOfCount = rs.getInt("COUNT(ArticleID)");
+                return NumbOfCount;
+            }else {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public User RegisterNewUser(User Who) {
+        try {
+            String query = "INSERT INTO User (Username, Password, AccessLevel) " +
+            "VALUES (?, ?, ?);";
             PreparedStatement myStmt = connection.prepareStatement(query);
             myStmt.setString(1, Who.Name);
             myStmt.setString(2, Who.Password);
-            myStmt.setInt(3, Who.UserID);
-            myStmt.setString(4, Who.AccessLevel);
+            myStmt.setString(3, Who.AccessLevel);
+            myStmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Who;
+    }
+
+    public void GivingLike(int IDofLiker, int IDofArticle) {
+        try {
+            String query = "INSERT INTO likes (UserID, ArticleID) " +
+                    "VALUES (?, ?);";
+            PreparedStatement myStmt = connection.prepareStatement(query);
+            myStmt.setInt(1, IDofLiker);
+            myStmt.setInt(2, IDofArticle);
             myStmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+
+    public User LogIn(String RDB_Username, String RDB_Password) {
+        try {
+            String query = "Select * From User Where Username = ? And  Password = ?";
+            PreparedStatement myStmt = connection.prepareStatement(query);
+            myStmt.setString(1, RDB_Username);
+            myStmt.setString(2, RDB_Password);
+            ResultSet rs = myStmt.executeQuery();
+            if (rs.next()) {
+                User SignedInUser = new User();
+                SignedInUser.Name = rs.getString("Username");
+                SignedInUser.UserID = rs.getInt("UserID");
+                SignedInUser.AccessLevel = rs.getString("AccessLevel");
+                return SignedInUser;
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 
     public ArrayList<User> ListUserDetails() {
@@ -143,9 +223,22 @@ public class SpikePersistantRDB {
 
     }
 
+    public void ModifyViewCount(Article param) {
+        try {
+            String querytoupdate = "Update Article Set ViewCount = ?, LikeCount = ? " +
+                    "Where ArticleID = " + param.ArticleID + ";";
+            PreparedStatement myStmt = connection.prepareStatement(querytoupdate);
+            myStmt.setString(1, String.valueOf(param.ViewCount));
+            myStmt.setInt(2, param.LikeCount);
+            myStmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public ArrayList<Article> ListArticles(String ArticleStatus, int UserID) {
         ArrayList<Article> ReturnList = new ArrayList<>();
-
     try {
         String querytolist = "Select * From Article" +
         " Where ArticleStatus = ? AND UserIDofAuthor = ? ;";
@@ -207,6 +300,42 @@ public class SpikePersistantRDB {
         return ReturnList;
     }
 
+    public Integer CountTotalLikes() {
+        int NumbOfCount;
+        try {
+            String query = "SELECT COUNT(ArticleID) FROM likes;";
+            PreparedStatement myStmt = connection.prepareStatement(query);
+            ResultSet rs = myStmt.executeQuery();
+            NumbOfCount = 0;
+            if (rs.next()) {
+                NumbOfCount = rs.getInt("COUNT(ArticleID)");
+                return NumbOfCount;
+            }else {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    public Integer CountTotalViews() {
+        int NumbOfCount;
+        try {
+            String query = "SELECT SUM(ViewCount) FROM article;";
+            PreparedStatement myStmt = connection.prepareStatement(query);
+            ResultSet rs = myStmt.executeQuery();
+            NumbOfCount = 0;
+            if (rs.next()) {
+                NumbOfCount = rs.getInt("SUM(ViewCount)");
+                return NumbOfCount;
+            }else {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }
