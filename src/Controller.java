@@ -19,7 +19,7 @@ public class Controller {
         MenuMap.put(5, new MenuItem(10, "5", "Register", "UserRegisterProcess", 10));
         MenuMap.put(6, new MenuItem(10, "6", "View Pending Articles", "SearchForArticles", 6, new ExtraMIdata("Pending", 6)));
         MenuMap.put(7, new MenuItem(10, "7", "Create Article", "UserVerification", 7));
-        MenuMap.put(8, new MenuItem(10, "8", "View Article Metrics", "DisplayAppMetrics", 10));
+        MenuMap.put(8, new MenuItem(10, "8", "View Page Metrics", "DisplayAppMetrics", 10));
         MenuMap.put(9, new MenuItem(10, "Q", "Quit", "Quit", 8));
 
         //Submenu for My Draft Articles
@@ -129,7 +129,12 @@ public class Controller {
             System.out.println("You can't access this feature without the right level of permissions, please Log In.");
             return;
         } else {
+            int TempLikeNumb = MyModel.CountLikes(Vparam.CWdata.CWArticleID);
+            TempLikeNumb = TempLikeNumb + 1;
+
             MyModel.GivingLike(MyView.MyUser.UserID, Vparam.CWdata.CWArticleID);
+            //int TempLikeNumb = MyModel.CountLikes(Vparam.CWdata.CWArticleID);
+            //System.out.println("Number of Likes for this Article: " + TempLikeNumb);
         }
     }
 
@@ -158,16 +163,18 @@ public class Controller {
     }
 
     public void UserLogIn(MenuItem param, ConsoleView Vparam) {
-
+        /*
         Console console = System.console();
         if (console == null) {
             System.out.println("Console not available");
             return;
-        }
+        } */
 
         String U_OutputText = "Please enter your Username: ";
+        String P_OutputText = "Please enter your Password: ";
         Vparam.CWdata.CWusername = Vparam.StringInput(U_OutputText);
-        Vparam.CWdata.CWpassword = new String(console.readPassword("Enter your password: "));
+        Vparam.CWdata.CWpassword = Vparam.StringInput(P_OutputText);
+        //Vparam.CWdata.CWpassword = new String(console.readPassword("Enter your password: "));
 
         User P_LogingInUser = MyModel.LogIn(Vparam.CWdata.CWusername, Vparam.CWdata.CWpassword);
         if (P_LogingInUser == null) {
@@ -181,30 +188,35 @@ public class Controller {
 
     public void UserRegisterProcess(MenuItem param, ConsoleView Vparam) {
 
+        /*
         Console console = System.console();
         if (console == null) {
             System.out.println("Console not available");
             return;
-        }
+        } */
 
-        String CU_OutputText = "Please create and enter your Username: ";
-        String CP_OutputText = "Please create and enter your Password: ";
+   //     String CU_OutputText = "Please create and enter your Username: ";
+     //   String CP_OutputText = "Please create and enter your Password: ";
 
-        Vparam.CWdata.CWusername = Vparam.StringInput(CU_OutputText);
-        Vparam.CWdata.CWpassword = new String(console.readPassword("Enter your password: "));
 
-        String tempPasswordComparison = new String(console.readPassword("Please re-enter your password: "));
+        String U_OutputText = "Please enter your Username: ";
+        String P_OutputText = "Please enter your Password: ";
+        Vparam.CWdata.CWusername = Vparam.StringInput(U_OutputText);
+        Vparam.CWdata.CWpassword = Vparam.StringInput(P_OutputText);
+        //Vparam.CWdata.CWusername = Vparam.StringInput(CU_OutputText);
+        //Vparam.CWdata.CWpassword = new String(console.readPassword("Enter your password: "));
 
-        if (Vparam.CWdata.CWpassword == tempPasswordComparison) {
+        String tempPasswordComparison = Vparam.StringInput("Please re-enter your password: ");
+
+        if (Vparam.CWdata.CWpassword.equals(tempPasswordComparison)) {
             User TempDataPass = new User();
 
-            TempDataPass.Name = Vparam.StringInput(CU_OutputText);
-            TempDataPass.Password  = Vparam.StringInput(CP_OutputText);
+            TempDataPass.Name = Vparam.CWdata.CWusername;
+            TempDataPass.Password  = Vparam.CWdata.CWpassword;
             TempDataPass.AccessLevel = "User";
             MyModel.RegisterNewUser(TempDataPass);
 
-            User P_LogedInUser = MyModel.LogIn(TempDataPass.Name, TempDataPass.Password);
-            MyView.MyUser = P_LogedInUser;
+            MyView.MyUser = MyModel.LogIn(TempDataPass.Name, TempDataPass.Password);
             System.out.println("Successful registration, welcome:");
             MyView.MyUser.Print();
         } else {
@@ -353,11 +365,9 @@ public class Controller {
         Article Loaded = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
         Loaded.Print();
         Loaded.ViewCount++;
-        int tempLikeCount = MyModel.CountLikes(Vparam.CWdata.CWArticleID);
-        Loaded.LikeCount = tempLikeCount;
         MyModel.ModifyViewCount(Loaded);
         System.out.println("This Article has been viewed " + Loaded.ViewCount + " times");
-        System.out.println("This Article has been liked " + tempLikeCount + " times");
+        System.out.println("This Article has been liked " + Loaded.LikeCount + " times");
     }
 
 }

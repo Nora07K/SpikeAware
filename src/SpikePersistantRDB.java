@@ -74,7 +74,7 @@ public class SpikePersistantRDB {
     public User RegisterNewUser(User Who) {
         try {
             String query = "INSERT INTO User (Username, Password, AccessLevel) " +
-            "VALUES (?, ?, ?);";
+            "VALUES (?, sha2(?, 0), ?);";
             PreparedStatement myStmt = connection.prepareStatement(query);
             myStmt.setString(1, Who.Name);
             myStmt.setString(2, Who.Password);
@@ -87,6 +87,7 @@ public class SpikePersistantRDB {
     }
 
     public void GivingLike(int IDofLiker, int IDofArticle) {
+        boolean IsDuplicate = false;
         try {
             String query = "INSERT INTO likes (UserID, ArticleID) " +
                     "VALUES (?, ?);";
@@ -94,15 +95,31 @@ public class SpikePersistantRDB {
             myStmt.setInt(1, IDofLiker);
             myStmt.setInt(2, IDofArticle);
             myStmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (RuntimeException | SQLException e) {
+            String ErrorMess = e.getMessage();
+            if (ErrorMess.contains("Duplicate entry")) {
+                IsDuplicate = true;
+            }
         }
+        if (IsDuplicate) {
+            return;
+        }
+        try {
+            String querytoupdate = "Update Article Set LikeCount = LikeCount + 1 " +
+                    "Where ArticleID = " + IDofArticle + ";";
+            PreparedStatement myStmt = connection.prepareStatement(querytoupdate);
+            myStmt.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
+
 
 
     public User LogIn(String RDB_Username, String RDB_Password) {
         try {
-            String query = "Select * From User Where Username = ? And  Password = ?";
+            String query = "Select * From User Where Username = ? And  Password = sha2(?, 0)";
             PreparedStatement myStmt = connection.prepareStatement(query);
             myStmt.setString(1, RDB_Username);
             myStmt.setString(2, RDB_Password);
@@ -223,18 +240,18 @@ public class SpikePersistantRDB {
 
     }
 
+
+
     public void ModifyViewCount(Article param) {
         try {
-            String querytoupdate = "Update Article Set ViewCount = ?, LikeCount = ? " +
+            String querytoupdate = "Update Article Set ViewCount = ?" +
                     "Where ArticleID = " + param.ArticleID + ";";
             PreparedStatement myStmt = connection.prepareStatement(querytoupdate);
             myStmt.setString(1, String.valueOf(param.ViewCount));
-            myStmt.setInt(2, param.LikeCount);
             myStmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     public ArrayList<Article> ListArticles(String ArticleStatus, int UserID) {
