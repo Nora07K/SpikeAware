@@ -1,3 +1,4 @@
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -5,11 +6,13 @@ public class ConsoleView {
     User MyUser;
     ArrayList<MenuItem> MenuMemory;
     ExtraCWdata CWdata;
+    Article CurrentArticle;
 
     public ConsoleView() {
         MenuMemory = new ArrayList<MenuItem>();
         MyUser = new User();
         CWdata = new ExtraCWdata();
+        CurrentArticle = new Article();
     }
 
     public String StringInput(String PinputText, String P_OriginalValue) {
@@ -28,6 +31,20 @@ public class ConsoleView {
         System.out.println(PinputText);
         String InputString = InputOfUser.nextLine();
         return InputString;
+    }
+
+    public String SecureStringInput(String SecPinputText) {
+        Console console = System.console();
+        if (console == null) {
+            System.out.println("Console not available please run this through Console");
+            return null;
+        }
+        String tempvalue = new String(console.readPassword(SecPinputText));
+        return tempvalue;
+    }
+
+    public void PrintContent(String StringValue) {
+        System.out.println(StringValue);
     }
 
     public MenuItem ChooseMenuItem() {
@@ -52,11 +69,8 @@ public class ConsoleView {
 
 
     public void DisplayMenuItem(MenuItem param) {
-        System.out.println(param.ParentID + " " + param.Hotkey + " " + param.Text + " " + param.Action + " " + param.NextID);
+        System.out.println(param.Hotkey + " " + param.Text);
         MenuMemory.add(param);
     }
 
-    public void DisplayArticle(Article abc) {
-
-    }
 }

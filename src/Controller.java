@@ -19,7 +19,7 @@ public class Controller {
         MenuMap.put(5, new MenuItem(10, "5", "Register", "UserRegisterProcess", 10));
         MenuMap.put(6, new MenuItem(10, "6", "View Pending Articles", "SearchForArticles", 6, new ExtraMIdata("Pending", 6)));
         MenuMap.put(7, new MenuItem(10, "7", "Create Article", "UserVerification", 7));
-        MenuMap.put(8, new MenuItem(10, "8", "View Page Metrics", "DisplayAppMetrics", 10));
+        MenuMap.put(8, new MenuItem(10, "8", "View Page Metrics", null, 8));
         MenuMap.put(9, new MenuItem(10, "Q", "Quit", "Quit", 8));
 
         //Submenu for My Draft Articles
@@ -27,7 +27,7 @@ public class Controller {
         MenuMap.put(12, new MenuItem(12, "A", "Load Selected Article", "LoadSelectedArticle", 14));
         MenuMap.put(115, new MenuItem(12, "B", "Back", null, 10));
         MenuMap.put(14, new MenuItem(14, "1", "Edit your Draft Article", null, 16));
-        MenuMap.put(15, new MenuItem(14, "2", "Submit your Article for approval", "ArticleTOpending", 10));
+        MenuMap.put(15, new MenuItem(14, "2", "Submit your Article for approval", "ArticleTOpending", 10, new ExtraMIdata("Pending")));
         MenuMap.put(121, new MenuItem(14, "H", "Home", "HomeOf", 10));
         MenuMap.put(16, new MenuItem(16, "T", "Article Title", "ArticleModification", 16, new ExtraMIdata("ArticleTitle")));
         MenuMap.put(17, new MenuItem(16, "C", "Article Content", "ArticleModification", 16, new ExtraMIdata("ArticleContent")));
@@ -37,7 +37,7 @@ public class Controller {
 
         //Submenu for My Rejected Articles
         MenuMap.put(222, new MenuItem(2, "B", "Back", null, 10));
-        MenuMap.put(21, new MenuItem(22, "A", "Load Selected Article", "LoadSelectedArticle", 24));
+        MenuMap.put(22, new MenuItem(22, "A", "Load Selected Article", "LoadSelectedArticle", 24));
         MenuMap.put(215, new MenuItem(22, "B", "Back", null, 10));
         MenuMap.put(24, new MenuItem(24, "1", "Edit your Rejected Article", null, 26));
         MenuMap.put(25, new MenuItem(24, "2", "Submit your rejected Article back for approval", "ArticleTOpending", 10, new ExtraMIdata("RejectReason")));
@@ -59,14 +59,14 @@ public class Controller {
         MenuMap.put(666, new MenuItem(6, "B", "Back", null, 10));
         MenuMap.put(62, new MenuItem(62, "A", "Load Selected Article", "LoadSelectedArticle", 64));
         MenuMap.put(615, new MenuItem(62, "B", "Back", null, 10));
-        MenuMap.put(64, new MenuItem(64, "1", "Reject the Article", "ArticleModification", 64, new ExtraMIdata("Reject")));
-        MenuMap.put(65, new MenuItem(64, "2", "Approve the Article", "ArticleModification", 64, new ExtraMIdata("Approve")));
+        MenuMap.put(64, new MenuItem(64, "1", "Reject the Article", "ArticleModification", 10, new ExtraMIdata("Reject")));
+        MenuMap.put(65, new MenuItem(64, "2", "Approve the Article", "ArticleModification", 10, new ExtraMIdata("Approve")));
         MenuMap.put(126, new MenuItem(64, "H", "Home", "HomeOf", 10));
 
         //Submenu for Create New Article
         MenuMap.put(73, new MenuItem(7, "B", "Back", null, 10));
         MenuMap.put(74, new MenuItem(7, "1", "Enter the Articles Information", null, 76));
-        MenuMap.put(75, new MenuItem(74, "2", "Submit your Article for approval", "ArticleTOpending", 10));
+        MenuMap.put(75, new MenuItem(74, "2", "Submit your Article for approval", "ArticleTOpending",10, new ExtraMIdata("Pending")));
         MenuMap.put(127, new MenuItem(74, "H", "Home", "HomeOf", 10));
         MenuMap.put(76, new MenuItem(76, "T", "Article Title", "ArticleCreation", 76, new ExtraMIdata("ArticleTitle")));
         MenuMap.put(77, new MenuItem(76, "C", "Article Content", "ArticleCreation", 76, new ExtraMIdata("ArticleContent")));
@@ -77,8 +77,9 @@ public class Controller {
 
 
         //Submenu for viewing app metrics
-   //     MenuMap.put(866, new MenuItem(8, "B", "Back", null, 10));
-     //   MenuMap.put(85, new MenuItem(8, "A", "Showing Site Metrics", "DisplayAppMetrics", 8));
+        MenuMap.put(866, new MenuItem(8, "B", "Back", null, 10));
+        MenuMap.put(85, new MenuItem(8, "A", "Showing Site Metrics", "DisplayAppMetrics", 8));
+        MenuMap.put(86, new MenuItem(8, "E", "ListIndividualizedAppMetrics", "ListIndividualizedAppMetrics", 8));
 
 
 
@@ -98,18 +99,21 @@ public class Controller {
                 }
             }
             MenuItem Chosen = MyView.ChooseMenuItem();
+            boolean ErrorOccurs = false;
             if (Chosen.Action != null) {
                 try {
                     String methodName = Chosen.Action;
                     //System.out.println("Next action: " + Chosen.Action);
                     Method getNameMethod = this.getClass().getMethod(methodName, MenuItem.class, ConsoleView.class);
-                    getNameMethod.invoke(this, Chosen, MyView);
+                    ErrorOccurs = (boolean) getNameMethod.invoke(this, Chosen, MyView);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
 
             }
-            //System.out.println("We are going to: " + Chosen.NextID);
+            if (ErrorOccurs) {
+                this.Run(CurrentMenu);
+            }
             CurrentMenu = Chosen.NextID;
         }
     }
@@ -120,25 +124,27 @@ public class Controller {
         System.exit(0);
     }
 
-    public void HomeOf(MenuItem param, ConsoleView Vparam) {
-        System.out.println("This is the Home Page of: " + MyView.MyUser.Name);
+    public boolean HomeOf(MenuItem param, ConsoleView Vparam) {
+        Vparam.PrintContent("This is the Home Page of: " + String.valueOf(MyView.MyUser));
+        return false;
     }
 
-    public void LikeOf(MenuItem param, ConsoleView Vparam) {
-        if (MyView.MyUser.UserID == 0) {
-            System.out.println("You can't access this feature without the right level of permissions, please Log In.");
-            return;
+    public boolean LikeOf(MenuItem param, ConsoleView Vparam) {
+        if (MyView.MyUser.getUserID() == 0) {
+            Vparam.PrintContent("You can't access this feature without the right level of permissions, please Log In.");
+            return true;
         } else {
-            int TempLikeNumb = MyModel.CountLikes(Vparam.CWdata.CWArticleID);
-            TempLikeNumb = TempLikeNumb + 1;
-
-            MyModel.GivingLike(MyView.MyUser.UserID, Vparam.CWdata.CWArticleID);
-            //int TempLikeNumb = MyModel.CountLikes(Vparam.CWdata.CWArticleID);
-            //System.out.println("Number of Likes for this Article: " + TempLikeNumb);
+            try {
+                MyModel.GivingLike(MyView.MyUser.getUserID(), Vparam.CWdata.CWArticleID);
+            } catch (Exception e) {
+                Vparam.PrintContent(String.valueOf(e));
+                return true;
+            }
+            return false;
         }
     }
 
-    public void SearchFunction(MenuItem param, ConsoleView Vparam) {
+    public boolean SearchFunction(MenuItem param, ConsoleView Vparam) {
         String U_OutputText = "Please enter the Article Title or Content your searching for ";
         Vparam.CWdata.CWsearchbarvalue = Vparam.StringInput(U_OutputText);
         String tempSearchData = "%" + Vparam.CWdata.CWsearchbarvalue + "%";
@@ -154,91 +160,95 @@ public class Controller {
             MenuMap.remove(DeleteMe.get(i));
         }
 
-        ArrayList<Article> ListofSearchedArticles = MyModel.ListArticlesForSearch(tempSearchData);
+        ArrayList<Article> ListofSearchedArticles = null;
+        try {
+            ListofSearchedArticles = MyModel.ListArticlesForSearch(tempSearchData);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
         for (int i = 0; i < ListofSearchedArticles.size(); i++) {
             Article element = ListofSearchedArticles.get(i);
-            MenuMap.put(100 + i, new MenuItem(3, "1" + i, element.ArticleTitle, "SaveArticleID", 32,
-            new ExtraMIdata(element.ArticleID)));
+            MenuMap.put(100 + i, new MenuItem(3, "1" + i, element.getArticleTitle(), "SaveArticleID", 32,
+            new ExtraMIdata(element.getArticleID())));
         }
+        return false;
     }
 
-    public void UserLogIn(MenuItem param, ConsoleView Vparam) {
-        /*
-        Console console = System.console();
-        if (console == null) {
-            System.out.println("Console not available");
-            return;
-        } */
-
+    public boolean UserLogIn(MenuItem param, ConsoleView Vparam) {
         String U_OutputText = "Please enter your Username: ";
         String P_OutputText = "Please enter your Password: ";
+        //Vparam.CWdata.CWpassword = Vparam.SecureStringInput(P_OutputText);
         Vparam.CWdata.CWusername = Vparam.StringInput(U_OutputText);
         Vparam.CWdata.CWpassword = Vparam.StringInput(P_OutputText);
-        //Vparam.CWdata.CWpassword = new String(console.readPassword("Enter your password: "));
-
-        User P_LogingInUser = MyModel.LogIn(Vparam.CWdata.CWusername, Vparam.CWdata.CWpassword);
+        User P_LogingInUser = new User();
+        try {
+            P_LogingInUser = MyModel.LogIn(Vparam.CWdata.CWusername, Vparam.CWdata.CWpassword);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
         if (P_LogingInUser == null) {
-            System.out.println("Error, User not found. Please try again");
+            Vparam.PrintContent("Error, User not found. Please try again");
+            return true;
         } else {
             MyView.MyUser = P_LogingInUser;
-            System.out.println("Successful log in, welcome:");
-            MyView.MyUser.Print();
+            Vparam.PrintContent("Successful log in, welcome:");
+            String TempPrintValue;
+            try {
+                TempPrintValue = String.valueOf(MyView.MyUser);
+            } catch (Exception e) {
+                Vparam.PrintContent(String.valueOf(e));
+                return true;
+            }
+            Vparam.PrintContent(TempPrintValue);
+            return false;
         }
     }
 
-    public void UserRegisterProcess(MenuItem param, ConsoleView Vparam) {
-
-        /*
-        Console console = System.console();
-        if (console == null) {
-            System.out.println("Console not available");
-            return;
-        } */
-
-   //     String CU_OutputText = "Please create and enter your Username: ";
-     //   String CP_OutputText = "Please create and enter your Password: ";
-
+    public boolean UserRegisterProcess(MenuItem param, ConsoleView Vparam) {
 
         String U_OutputText = "Please enter your Username: ";
         String P_OutputText = "Please enter your Password: ";
         Vparam.CWdata.CWusername = Vparam.StringInput(U_OutputText);
         Vparam.CWdata.CWpassword = Vparam.StringInput(P_OutputText);
-        //Vparam.CWdata.CWusername = Vparam.StringInput(CU_OutputText);
-        //Vparam.CWdata.CWpassword = new String(console.readPassword("Enter your password: "));
-
+//        Vparam.CWdata.CWpassword = Vparam.SecureStringInput(P_OutputText);
         String tempPasswordComparison = Vparam.StringInput("Please re-enter your password: ");
 
         if (Vparam.CWdata.CWpassword.equals(tempPasswordComparison)) {
             User TempDataPass = new User();
 
-            TempDataPass.Name = Vparam.CWdata.CWusername;
-            TempDataPass.Password  = Vparam.CWdata.CWpassword;
-            TempDataPass.AccessLevel = "User";
-            MyModel.RegisterNewUser(TempDataPass);
+            TempDataPass.setName(Vparam.CWdata.CWusername);
+            TempDataPass.setPassword(Vparam.CWdata.CWpassword);
+            TempDataPass.setAccessLevel("User");
+            try {
+                MyModel.RegisterNewUser(TempDataPass);
+            } catch (Exception e) {
+                Vparam.PrintContent(String.valueOf(e));
+                return true;
+            }
 
-            MyView.MyUser = MyModel.LogIn(TempDataPass.Name, TempDataPass.Password);
-            System.out.println("Successful registration, welcome:");
-            MyView.MyUser.Print();
+            try {
+                MyView.MyUser = MyModel.LogIn(TempDataPass.getName(), TempDataPass.getPassword());
+            } catch (Exception e) {
+                Vparam.PrintContent(String.valueOf(e));
+                return true;
+            }
+            Vparam.PrintContent("Successful registration, welcome:");
+            String TempPrintValue = String.valueOf(MyView.MyUser);
+            Vparam.PrintContent(TempPrintValue);
+            return false;
         } else {
-            System.out.println("Your password doesn't match to the second input, please ensure you have correctly wrote your password");
+            Vparam.PrintContent("Your password doesn't match to the second input, please ensure you have correctly wrote your password");
+            return true;
         }
-
     }
 
-    public void CreateNewArticle(MenuItem param, ConsoleView Vparam) {
-        Article TempArticleForData = new Article();
-        String U_OutputText = "Please enter your Username: ";
-        String P_OutputText = "Please enter your Password: ";
-        Vparam.CWdata.CWusername = Vparam.StringInput(U_OutputText);
-        Vparam.CWdata.CWpassword = Vparam.StringInput(P_OutputText);
 
-
-    }
-
-    public void SearchForArticles(MenuItem param, ConsoleView Vparam) {
-        if (MyView.MyUser.UserID == 0) {
-            System.out.println("You can't access this feature without the right level of permissions, please Log In.");
-            return;
+    public boolean SearchForArticles(MenuItem param, ConsoleView Vparam) {
+        if ((MyView.MyUser.getUserID()) == 0) {
+            Vparam.PrintContent("You can't access this feature without the right level of permissions, please Log In.");
+            return true;
         } else {
             ArrayList<Integer> DeleteMe = new ArrayList<Integer>();
             for (Integer i : MenuMap.keySet()) {
@@ -251,123 +261,214 @@ public class Controller {
             }
 
             if (param.Xtra.ArticleListParentID == 1) {
-                ArrayList<Article> ListofDraftArticles = MyModel.ListArticles(param.Xtra.ArticleModifyType, MyView.MyUser.UserID);
+                ArrayList<Article> ListofDraftArticles;
+                try {
+                    ListofDraftArticles = MyModel.ListArticles(param.Xtra.ArticleModifyType, MyView.MyUser.getUserID());
+                } catch (Exception e) {
+                    Vparam.PrintContent(String.valueOf(e));
+                    return true;
+                }
                 for (int i = 0; i < ListofDraftArticles.size(); i++) {
                     Article element = ListofDraftArticles.get(i);
-                    MenuMap.put(100 + i, new MenuItem(1, "1" + i, element.ArticleTitle, "SaveArticleID", 12,
-                            new ExtraMIdata(element.ArticleID))
+                    MenuMap.put(100 + i, new MenuItem(1, "1" + i, element.getArticleTitle(), "SaveArticleID", 12,
+                            new ExtraMIdata(element.getArticleID()))
                     );
                 }
             } else if (param.Xtra.ArticleListParentID == 2) {
-                ArrayList<Article> ListofRejectedArticles = MyModel.ListArticles(param.Xtra.ArticleModifyType, MyView.MyUser.UserID);
+                ArrayList<Article> ListofRejectedArticles;
+                try {
+                    ListofRejectedArticles = MyModel.ListArticles(param.Xtra.ArticleModifyType, MyView.MyUser.getUserID());
+                } catch (Exception e) {
+                    Vparam.PrintContent(String.valueOf(e));
+                    return true;
+                }
                 for (int i = 0; i < ListofRejectedArticles.size(); i++) {
                     Article element = ListofRejectedArticles.get(i);
-                    MenuMap.put(100 + i, new MenuItem(2, "1" + i, element.ArticleTitle, "SaveArticleID", 22,
-                            new ExtraMIdata(element.ArticleID))
+                    MenuMap.put(100 + i, new MenuItem(2, "1" + i, element.getArticleTitle(), "SaveArticleID", 22,
+                            new ExtraMIdata(element.getArticleID()))
                     );
                 }
             } else if (param.Xtra.ArticleListParentID == 6) {
-                if (!(MyView.MyUser.AccessLevel.equals("Super Admin"))) {
-                    System.out.println("You can't access this feature without being a Super Admin");
-                    return;
+                if (!(MyView.MyUser.getAccessLevel().equals("Super Admin"))) {
+                    Vparam.PrintContent("You can't access this feature without being a Super Admin");
+                    return true;
                 } else {
-                    ArrayList<Article> ListofPendingArticles = MyModel.ListPendingArticles(param.Xtra.ArticleModifyType);
+                    ArrayList<Article> ListofPendingArticles;
+                    try {
+                        ListofPendingArticles = MyModel.ListPendingArticles(param.Xtra.ArticleModifyType);
+                    } catch (Exception e) {
+                        Vparam.PrintContent(String.valueOf(e));
+                        return true;
+                    }
                     for (int i = 0; i < ListofPendingArticles.size(); i++) {
                         Article element = ListofPendingArticles.get(i);
-                        MenuMap.put(100 + i, new MenuItem(6, "1" + i, element.ArticleTitle, "SaveArticleID", 62,
-                        new ExtraMIdata(element.ArticleID))
+                        MenuMap.put(100 + i, new MenuItem(6, "1" + i, element.getArticleTitle(), "SaveArticleID", 62,
+                        new ExtraMIdata(element.getArticleID()))
                         );
                     }
                 }
             }
+            return false;
         }
     }
 
-    public void SaveArticleID(MenuItem param, ConsoleView Vparam) {
+    public boolean SaveArticleID(MenuItem param, ConsoleView Vparam) {
         Vparam.CWdata.CWArticleID = param.Xtra.ArticleID;
+        return false;
     }
 
-    public void LoadSelectedArticle(MenuItem param, ConsoleView Vparam) {
-        Article Loaded = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
-        Loaded.Print();
+    public boolean LoadSelectedArticle(MenuItem param, ConsoleView Vparam) {
+        Article Loaded = new Article();
+        try {
+            Loaded = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
+        String TempPrintValue = String.valueOf(Loaded);
+        Vparam.PrintContent(TempPrintValue);
+        return false;
     }
 
-    public void ArticleModification(MenuItem param, ConsoleView Vparam) {
-        Article CurrArticle = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
-        //ExtraCWdata has infinite memory
+    public boolean ArticleModification(MenuItem param, ConsoleView Vparam) {
+        Article CurrArticle = new Article();
+        try {
+            CurrArticle = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
         String OutputText = "Please enter the: " + param.Text;
         if (param.Xtra.ArticleModifyType == "ArticleTitle") {
-            CurrArticle.ArticleTitle = Vparam.StringInput(OutputText, CurrArticle.ArticleTitle);
+            CurrArticle.setArticleTitle(Vparam.StringInput(OutputText, CurrArticle.getArticleTitle()));
         } else if (param.Xtra.ArticleModifyType == "ArticleContent") {
-            CurrArticle.ArticleContent = Vparam.StringInput(OutputText, CurrArticle.ArticleContent);
+            CurrArticle.setArticleContent(Vparam.StringInput(OutputText, CurrArticle.getArticleContent()));
         }else if (param.Xtra.ArticleModifyType == "ArticleVideoURL") {
-            CurrArticle.ArticleVideoURL = Vparam.StringInput(OutputText, CurrArticle.ArticleVideoURL);
+            CurrArticle.setArticleVideoURL(Vparam.StringInput(OutputText, CurrArticle.getArticleVideoURL()));
         } else if (param.Xtra.ArticleModifyType == "ArticleImageURL") {
-            CurrArticle.ArticleImageURL = Vparam.StringInput(OutputText, CurrArticle.ArticleImageURL);
+            CurrArticle.setArticleImageURL(Vparam.StringInput(OutputText, CurrArticle.getArticleImageURL()));
         }else if (param.Xtra.ArticleModifyType == "Approve") {
-            CurrArticle.ArticleStatus = "Approved";
-            CurrArticle.RejectionReason = null;
+            CurrArticle.setArticleStatus("Approved");
+            CurrArticle.setRejectionReason(null);
         }else if (param.Xtra.ArticleModifyType == "Reject") {
-            CurrArticle.ArticleStatus = "Rejected";
+            CurrArticle.setArticleStatus("Rejected");
             String OutputTextforRejReason = "Please enter the rejection reason";
-            CurrArticle.RejectionReason = Vparam.StringInput(OutputTextforRejReason);
+            CurrArticle.setRejectionReason(Vparam.StringInput(OutputTextforRejReason));
         }
-        MyModel.ModifyArticle(CurrArticle);
+        try {
+            MyModel.ModifyArticle(CurrArticle);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
+        return false;
     }
 
-    public void ArticleTOpending(MenuItem param, ConsoleView Vparam) {
-        Article CurrArticle = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
-        String OutputText = "Sending Article for approval...";
+    public boolean ArticleTOpending(MenuItem param, ConsoleView Vparam) {
+        Article CurrArticle = new Article();
+        try {
+            CurrArticle = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
+//        System.out.println("Sending Article for approval...");
         if (param.Xtra.ArticleModifyType.equals("RejectReason")) {
-            CurrArticle.RejectionReason = null;
+            CurrArticle.setRejectionReason(null);
         }
-        CurrArticle.ArticleStatus = "Pending";
-        MyModel.ModifyArticle(CurrArticle);
+        if (param.Xtra.ArticleModifyType.equals("Pending")) {
+            CurrArticle.setArticleStatus("Pending");
+        }
+        try {
+            MyModel.ModifyArticle(CurrArticle);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
+        return false;
     }
 
-    public void UserVerification(MenuItem param, ConsoleView Vparam) {
-        if (MyView.MyUser.UserID == 0) {
-            System.out.println("You can't access this feature without the right level of permissions, please Log In.");
-            param.NextID = 10;
-        }else {
-            param.NextID = 7;
+    public boolean UserVerification(MenuItem param, ConsoleView Vparam) {
+        if (MyView.MyUser.getUserID() == 0) {
+            Vparam.PrintContent("You can't access this feature without the right level of permissions, please Log In.");
+            return true;
         }
-        return;
+        return false;
     }
 
-    public void ArticleCreation(MenuItem param, ConsoleView Vparam) {
-        Article New_Article = new Article();
-        New_Article.UserIDofAuthor = MyView.MyUser.UserID;
+    public boolean ArticleCreation(MenuItem param, ConsoleView Vparam) {
+        Article New_Article = Vparam.CurrentArticle;
+        New_Article.setUserIDofAuthor(MyView.MyUser.getUserID());
         String OutputText = "Please enter the: " + param.Text;
-        if (param.Xtra.ArticleModifyType == "ArticleTitle") {
-            New_Article.ArticleTitle = Vparam.StringInput(OutputText, New_Article.ArticleTitle);
-        } else if (param.Xtra.ArticleModifyType == "ArticleContent") {
-            New_Article.ArticleContent = Vparam.StringInput(OutputText, New_Article.ArticleContent);
-        } else if (param.Xtra.ArticleModifyType == "ArticleVideoURL") {
-            New_Article.ArticleVideoURL = Vparam.StringInput(OutputText, New_Article.ArticleVideoURL);
-        } else if (param.Xtra.ArticleModifyType == "ArticleImageURL") {
-            New_Article.ArticleImageURL = Vparam.StringInput(OutputText, New_Article.ArticleImageURL);
+        if (param.Xtra.ArticleModifyType.equals("ArticleTitle")) {
+            New_Article.setArticleTitle(Vparam.StringInput(OutputText, New_Article.getArticleTitle()));
+        } else if (param.Xtra.ArticleModifyType.equals("ArticleContent")) {
+            New_Article.setArticleContent(Vparam.StringInput(OutputText, New_Article.getArticleContent()));
+        } else if (param.Xtra.ArticleModifyType.equals("ArticleVideoURL")) {
+            New_Article.setArticleVideoURL(Vparam.StringInput(OutputText, New_Article.getArticleVideoURL()));
+        } else if (param.Xtra.ArticleModifyType.equals("ArticleImageURL")) {
+            New_Article.setArticleImageURL(Vparam.StringInput(OutputText, New_Article.getArticleImageURL()));
         }
+        int ArticleID =0;
+        if ((New_Article.getArticleTitle()) != null && (New_Article.getArticleContent()) != null && param.Xtra.ArticleModifyType.equals("CreateArticle")) {
+            try {
+                ArticleID = MyModel.CreateArticle(New_Article);
+            } catch (Exception e) {
+                Vparam.PrintContent(String.valueOf(e));
+                return true;
+            }
+            Vparam.PrintContent("Successful Article Creation!");
+        }
+        Vparam.CWdata.CWArticleID = ArticleID;
 
-        if (New_Article.ArticleTitle != null && New_Article.ArticleContent != null && param.Xtra.ArticleModifyType == "CreateArticle") {
-            MyModel.CreateArticle(New_Article);
-        }
+        return false;
     }
 
-    public void DisplayAppMetrics(MenuItem param, ConsoleView Vparam) {
-        int TotalLikeCount = MyModel.CountTotalLikes();
-        int TotalViewCount = MyModel.CountTotalViews();
-        System.out.println("Total number of likes across all articles is: " + TotalLikeCount);
-        System.out.println("Total number of views across all articles is: " + TotalViewCount);
+
+    public boolean DisplayAppMetrics(MenuItem param, ConsoleView Vparam) {
+        int TotalLikeCount;
+        int TotalViewCount;
+        try {
+            TotalLikeCount = MyModel.CountTotalLikes();
+            TotalViewCount = MyModel.CountTotalViews();
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
+        Vparam.PrintContent("Total number of likes across all articles is: " + TotalLikeCount);
+        Vparam.PrintContent("Total number of views across all articles is: " + TotalViewCount);
+        return false;
     }
 
-    public void DisplaySelectedArticle(MenuItem param, ConsoleView Vparam) {
-        Article Loaded = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
-        Loaded.Print();
-        Loaded.ViewCount++;
-        MyModel.ModifyViewCount(Loaded);
-        System.out.println("This Article has been viewed " + Loaded.ViewCount + " times");
-        System.out.println("This Article has been liked " + Loaded.LikeCount + " times");
+    public boolean ListIndividualizedAppMetrics(MenuItem param, ConsoleView Vparam) {
+        ArrayList<Article> ListofApprovedArticlesStats;
+        try {
+            ListofApprovedArticlesStats = MyModel.ListApprovedArticlesStatistic("Approved");
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
+        for (int i = 0; i < ListofApprovedArticlesStats.size(); i++) {
+            Article element = ListofApprovedArticlesStats.get(i);
+            String TempPrintValue = String.valueOf(element);
+            Vparam.PrintContent(TempPrintValue);
+        }
+        return false;
+    }
+
+    public boolean DisplaySelectedArticle(MenuItem param, ConsoleView Vparam) {
+        Article Loaded = new Article();
+        try {
+            Loaded = MyModel.LoadArticle(Vparam.CWdata.CWArticleID);
+            Loaded.setViewCount(Loaded.getViewCount()+1);
+            MyModel.ModifyViewCount(Loaded);
+        } catch (Exception e) {
+            Vparam.PrintContent(String.valueOf(e));
+            return true;
+        }
+        String TempPrintValue = String.valueOf(Loaded);
+        Vparam.PrintContent(TempPrintValue);
+        return false;
     }
 
 }
